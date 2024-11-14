@@ -1,0 +1,1 @@
+ D:\\Android_SDK\\wearly\\.dart_tool\\flutter_build\\672f454b762ba59f3ecd014417ea2f79\\native_assets.yaml: 
