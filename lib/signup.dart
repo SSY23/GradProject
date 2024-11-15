@@ -16,6 +16,7 @@ class _AuthViewState extends State<AuthView> {
   final TextEditingController birthYearController = TextEditingController();
   final TextEditingController birthMonthController = TextEditingController();
   final TextEditingController birthDayController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
   bool isMale = true; // 성별 선택
   bool isLoading = false;
 
@@ -27,6 +28,7 @@ class _AuthViewState extends State<AuthView> {
     birthYearController.dispose();
     birthMonthController.dispose();
     birthDayController.dispose();
+    ageController.dispose();
     super.dispose();
   }
 
@@ -51,7 +53,7 @@ class _AuthViewState extends State<AuthView> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://your-server.com/register'); // 서버의 URL을 입력하세요
+    final url = Uri.parse('http://your-server.com/auth/signup'); // 서버 URL
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -62,10 +64,11 @@ class _AuthViewState extends State<AuthView> {
         'gender': isMale ? 'M' : 'F',
         'birthdate':
             '${birthYearController.text}-${birthMonthController.text}-${birthDayController.text}',
+        'age': ageController.text,
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       print('회원가입 성공');
     } else {
       _showErrorDialog('회원가입 실패: ${response.body}');
@@ -82,14 +85,22 @@ class _AuthViewState extends State<AuthView> {
       color: Colors.white,
       child: SafeArea(
         child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            title: const Text('회원가입'),
+            backgroundColor: Colors.blue,
+          ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Center(
-                    child: Text('회원가입', style: TextStyle(fontSize: 24))),
                 const SizedBox(height: 20),
                 const Text('이메일'),
                 TextField(
@@ -165,6 +176,13 @@ class _AuthViewState extends State<AuthView> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 20),
+                const Text('나이'),
+                TextField(
+                  controller: ageController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(hintText: '나이'),
                 ),
                 const SizedBox(height: 20),
                 GestureDetector(

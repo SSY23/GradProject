@@ -46,3 +46,20 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('홈 화면'),
+      ),
+      body: const Center(
+        child: Text('홈 화면', style: TextStyle(fontSize: 24)),
+      ),
+    );
+  }
+}
