@@ -68,7 +68,7 @@ class _AuthViewState extends State<AuthView> {
       }),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       print('회원가입 성공');
     } else {
       _showErrorDialog('회원가입 실패: ${response.body}');

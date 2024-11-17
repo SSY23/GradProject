@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:wearly/home_screen.dart';
+import 'package:wearly/firstscreen.dart';
+import 'package:wearly/homescreen.dart';
 import 'package:wearly/signup.dart';
-import 'package:wearly/login.dart';
-
-void main() async {
-  runApp(const MyApp());
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -21,6 +17,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/signup': (context) => const AuthView(),
         '/login': (context) => const LoginView(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }

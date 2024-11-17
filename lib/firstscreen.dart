@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class FirstScreen extends StatelessWidget {
+  const FirstScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,10 +11,8 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 로고 이미지 위젯
             Image.asset(
-              'assets/images/WEarly_logo.png', // 로고 이미지 경로
-              width: 250, // 이미지 크기 조정
+              'assets/images/WEarly_logo.png',
               height: 250,
             ),
             const SizedBox(height: 50),
@@ -42,23 +40,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class HomeView extends StatelessWidget {
-  const HomeView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('홈 화면'),
-      ),
-      body: const Center(
-        child: Text('홈 화면', style: TextStyle(fontSize: 24)),
       ),
     );
   }

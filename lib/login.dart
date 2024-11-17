@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:wearly/home_screen.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -58,10 +57,9 @@ class _LoginViewState extends State<LoginView> {
       // 로그인 성공 처리
       print('로그인 성공');
       // 홈 화면으로 이동
-      Navigator.push(
-        // ignore: use_build_context_synchronously
+      Navigator.pushReplacementNamed(
         context,
-        MaterialPageRoute(builder: (context) => const HomeView()),
+        '/home', // routes에 정의된 '/home'으로 이동
       );
     } else {
       // 로그인 실패 시 경고 문구 표시
