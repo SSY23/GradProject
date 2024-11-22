@@ -1,0 +1,7 @@
+# Node.js 관련
+.env
+node_modules/
+
+#git 관련
+.git/
+
