@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:wearly/remove_back.dart';
 
-// 홈 화면
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -11,16 +11,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0; // Default: 첫 번째 버튼 선택 (옷장)
-  final List<File> _uploadedImages = [];
+  int _currentIndex = 0; // Default: 옷장
+  final List<dynamic> _uploadedImages = []; // File 또는 URL 저장 가능
   final ImagePicker _picker = ImagePicker();
+  final RemoveBgService _removeBgService = RemoveBgService();
 
   Future<void> _pickImage(ImageSource source) async {
     final XFile? pickedFile = await _picker.pickImage(source: source);
     if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
       setState(() {
-        _uploadedImages.add(File(pickedFile.path));
+        _uploadedImages.add(imageFile);
       });
+
+      // 배경 제거 API 호출 (서버와 연결)
+      String? resultUrl = await _removeBgService.removeBackground(imageFile);
+      if (resultUrl != null) {
+        setState(() {
+          _uploadedImages[_uploadedImages.length - 1] = resultUrl; // URL로 업데이트
+        });
+      }
     }
   }
 
@@ -34,14 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
         return SafeArea(
           child: Wrap(
             children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('촬영하기'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
               ListTile(
                 leading: const Icon(Icons.photo),
                 title: const Text('앨범에서 선택하기'),
@@ -64,6 +66,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _removeImage(int index) {
+    setState(() {
+      _uploadedImages.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Stack(
         children: [
-          // 옷장, 추천 기록, 마이 페이지에 따른 콘텐츠 표시
           _currentIndex == 0
               ? GridView.builder(
             padding: const EdgeInsets.all(10),
@@ -83,9 +90,39 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             itemCount: _uploadedImages.length,
             itemBuilder: (context, index) {
-              return Image.file(
-                _uploadedImages[index],
-                fit: BoxFit.cover,
+              var image = _uploadedImages[index];
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  image is String
+                      ? Image.network(
+                    image,
+                    fit: BoxFit.cover,
+                  )
+                      : Image.file(
+                    image,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: GestureDetector(
+                      onTap: () => _removeImage(index),
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: const BoxDecoration(
+                          color: Colors.black12,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.remove,
+                          color: Colors.white,
+                          size: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           )

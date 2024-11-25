@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:wearly/firstscreen.dart';
 import 'package:wearly/homescreen.dart';
 import 'package:wearly/signup.dart';
+import 'package:wearly/login.dart';
+
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
-      home: const HomeScreen(), // 초기 화면
+      home: const FirstScreen(), // 초기 화면
       routes: {
         '/signup': (context) => const AuthView(),
         '/login': (context) => const LoginView(),

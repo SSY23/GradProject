@@ -17,7 +17,7 @@ class _AuthViewState extends State<AuthView> {
   final TextEditingController birthMonthController = TextEditingController();
   final TextEditingController birthDayController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
-  bool isMale = true; // 성별 선택
+  bool? isMale = true;
   bool isLoading = false;
 
   @override
@@ -48,12 +48,58 @@ class _AuthViewState extends State<AuthView> {
     );
   }
 
+  Future<void> _showSuccessDialog(String message) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('성공'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // 성공 후 이전 화면으로 이동
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _registerUser() async {
+    if (emailController.text.isEmpty) {
+      _showErrorDialog('이메일을 입력해주세요.');
+      return;
+    }
+    if (pwdController.text.isEmpty) {
+      _showErrorDialog('비밀번호를 입력해주세요.');
+      return;
+    }
+    if (nameController.text.isEmpty) {
+      _showErrorDialog('이름을 입력해주세요.');
+      return;
+    }
+    if (isMale == null) {
+      _showErrorDialog('성별을 선택해주세요.');
+      return;
+    }
+    if (birthYearController.text.isEmpty ||
+        birthMonthController.text.isEmpty ||
+        birthDayController.text.isEmpty) {
+      _showErrorDialog('생년월일을 입력해주세요.');
+      return;
+    }
+    if (ageController.text.isEmpty) {
+      _showErrorDialog('나이를 입력해주세요.');
+      return;
+    }
+
     setState(() {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://your-server.com/auth/signup'); // 서버 URL
+    final url = Uri.parse('http://192.168.13.112/auth/signup');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -61,15 +107,15 @@ class _AuthViewState extends State<AuthView> {
         'email': emailController.text,
         'password': pwdController.text,
         'name': nameController.text,
-        'gender': isMale ? 'M' : 'F',
+        'gender': isMale == true ? 'M' : 'F',
         'birthdate':
-            '${birthYearController.text}-${birthMonthController.text}-${birthDayController.text}',
+        '${birthYearController.text}-${birthMonthController.text}-${birthDayController.text}',
         'age': ageController.text,
       }),
     );
 
     if (response.statusCode == 200) {
-      print('회원가입 성공');
+      _showSuccessDialog('회원가입이 완료되었습니다.');
     } else {
       _showErrorDialog('회원가입 실패: ${response.body}');
     }
@@ -193,10 +239,10 @@ class _AuthViewState extends State<AuthView> {
                     child: Center(
                       child: isLoading
                           ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
+                        color: Colors.white,
+                      )
                           : const Text('가입하기',
-                              style: TextStyle(color: Colors.white)),
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ),

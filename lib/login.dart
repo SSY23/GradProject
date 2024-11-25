@@ -43,7 +43,7 @@ class _LoginViewState extends State<LoginView> {
     });
 
     final url =
-        Uri.parse('http://your-server.com/auth/login'); // 서버의 URL을 입력하세요
+    Uri.parse('http://172.20.4.99:3000/auth/login'); // 서버의 URL을 입력하세요
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -54,15 +54,12 @@ class _LoginViewState extends State<LoginView> {
     );
 
     if (response.statusCode == 200) {
-      // 로그인 성공 처리
       print('로그인 성공');
-      // 홈 화면으로 이동
       Navigator.pushReplacementNamed(
         context,
-        '/home', // routes에 정의된 '/home'으로 이동
+        '/home',
       );
     } else {
-      // 로그인 실패 시 경고 문구 표시
       _showErrorDialog('로그인 실패: 이메일이나 비밀번호를 확인하세요.');
     }
     setState(() {
@@ -110,10 +107,10 @@ class _LoginViewState extends State<LoginView> {
                 child: Center(
                   child: isLoading
                       ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
+                    color: Colors.white,
+                  )
                       : const Text('로그인하기',
-                          style: TextStyle(color: Colors.white)),
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
             ),
