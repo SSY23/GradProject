@@ -3,10 +3,14 @@ const multer = require('multer');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const FormData = require('form-data');  // form-data 패키지 임포트
+
+const testUpload = require('multer')({ dest: 'uploads/test/' }); 
+
 const router = express.Router();
 
 const REMOVE_BG_API_KEY = process.env.REMOVE_BG_API_KEY; // 바로 사용 가능
-
+/*
 // Multer 설정 - /add 엔드포인트용 (원본 이미지 저장 디렉토리)
 const addStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -29,7 +33,6 @@ const testStorage = multer.diskStorage({
     cb(null, uniqueSuffix + '-' + file.originalname); // 고유한 파일 이름 생성
   },
 });
-const testUpload = multer({ storage: testStorage });
 
 // /closet/add 엔드포인트
 router.post('/add', addUpload.single('image'), async (req, res) => {
@@ -42,21 +45,32 @@ router.post('/add', addUpload.single('image'), async (req, res) => {
   }
 
   try {
+    // remove.bg API 호출을 위한 FormData 생성
+    const form = new FormData();
+    form.append('image_file', fs.createReadStream(imageFile.path));
+
+    // FormData의 헤더 추출
+    const headers = form.getHeaders();
+    headers['X-Api-Key'] = REMOVE_BG_API_KEY; // API 키 추가
+
+    console.log('Calling remove.bg API with image:', imageFile.path);  // 디버깅용 메시지
+
     // remove.bg API 호출
-    const removeBgResponse = await axios({
-      method: 'post',
-      url: 'https://api.remove.bg/v1.0/removebg',
-      headers: {
-        'X-Api-Key': REMOVE_BG_API_KEY,
-      },
-      data: {
-        image_file: fs.createReadStream(imageFile.path),
-      },
-      responseType: 'arraybuffer',
+    const removeBgResponse = await axios.post('https://api.remove.bg/v1.0/removebg', form, {
+      headers: headers, 
+      responseType: 'arraybuffer' // 이미지 데이터를 배열로 받음
     });
 
+    console.log('remove.bg API response received');  // 디버깅용 메시지
+
+    // 배경이 제거된 이미지 파일 경로 생성
     const bgRemovedPath = path.join('uploads', `bg-removed-${imageFile.filename}`);
     fs.writeFileSync(bgRemovedPath, removeBgResponse.data);
+    console.log('Background removed image saved to:', bgRemovedPath);  // 디버깅용 메시지
+
+    // 원본 이미지 파일 삭제 (더 이상 필요 없을 경우)
+    fs.unlinkSync(imageFile.path);  // 원본 이미지 삭제
+    console.log('Original image deleted:', imageFile.path);  // 디버깅용 메시지
 
     // 새로운 아이템 데이터
     const newItem = {
@@ -79,6 +93,7 @@ router.post('/add', addUpload.single('image'), async (req, res) => {
     res.status(500).json({ error: 'Failed to process the image.' });
   }
 });
+*/
 
 router.post('/test', testUpload.single('image'), async (req, res) => {
   const imageFile = req.file;
@@ -92,19 +107,20 @@ router.post('/test', testUpload.single('image'), async (req, res) => {
   console.log('Received image file:', imageFile);  // 디버깅용 메시지
 
   try {
-    // remove.bg API 호출
+    // remove.bg API 호출을 위한 FormData 생성
+    const form = new FormData();
+    form.append('image_file', fs.createReadStream(imageFile.path));
+
+    // FormData의 헤더 추출
+    const headers = form.getHeaders();
+    headers['X-Api-Key'] = REMOVE_BG_API_KEY; // API 키 추가
+
     console.log('Calling remove.bg API with image:', imageFile.path);  // 디버깅용 메시지
 
-    const removeBgResponse = await axios({
-      method: 'post',
-      url: 'https://api.remove.bg/v1.0/removebg',
-      headers: {
-        'X-Api-Key': REMOVE_BG_API_KEY,
-      },
-      data: {
-        image_file: fs.createReadStream(imageFile.path),
-      },
-      responseType: 'arraybuffer',
+    // remove.bg API 호출
+    const removeBgResponse = await axios.post('https://api.remove.bg/v1.0/removebg', form, {
+      headers: headers, 
+      responseType: 'arraybuffer' // 이미지 데이터를 배열로 받음
     });
 
     console.log('remove.bg API response received');  // 디버깅용 메시지
@@ -118,10 +134,16 @@ router.post('/test', testUpload.single('image'), async (req, res) => {
     fs.unlinkSync(imageFile.path);  // 원본 이미지 삭제
     console.log('Original image deleted:', imageFile.path);  // 디버깅용 메시지
 
+    // 서버 URL을 동적으로 생성
+    const serverUrl = req.protocol + '://' + req.get('host');
+
+    // 배경이 제거된 이미지 URL 생성
+    const bgRemovedImageUrl = `${serverUrl}/uploads/test/bg-removed-${imageFile.filename}`;
+
     // 응답
     res.status(200).json({
       message: '배경이 제거된 이미지가 성공적으로 처리되었습니다!',
-      bg_removed_image_url: `/uploads/test/bg-removed-${imageFile.filename}`,
+      bg_removed_image_url: bgRemovedImageUrl,  // 서버 URL로 반환
     });
   } catch (error) {
     console.error('remove.bg API error:', error);  // 디버깅용 메시지
@@ -130,3 +152,4 @@ router.post('/test', testUpload.single('image'), async (req, res) => {
 });
 
 module.exports = router;
+
