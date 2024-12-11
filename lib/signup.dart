@@ -99,7 +99,7 @@ class _AuthViewState extends State<AuthView> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://192.168.13.112/auth/signup');
+    final url = Uri.parse('http://172.20.40.40:3000/auth/signup');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -109,12 +109,12 @@ class _AuthViewState extends State<AuthView> {
         'name': nameController.text,
         'gender': isMale == true ? 'M' : 'F',
         'birthdate':
-        '${birthYearController.text}-${birthMonthController.text}-${birthDayController.text}',
+            '${birthYearController.text}-${birthMonthController.text}-${birthDayController.text}',
         'age': ageController.text,
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       _showSuccessDialog('회원가입이 완료되었습니다.');
     } else {
       _showErrorDialog('회원가입 실패: ${response.body}');
@@ -239,10 +239,10 @@ class _AuthViewState extends State<AuthView> {
                     child: Center(
                       child: isLoading
                           ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
+                              color: Colors.white,
+                            )
                           : const Text('가입하기',
-                          style: TextStyle(color: Colors.white)),
+                              style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ),

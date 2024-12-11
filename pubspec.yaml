@@ -38,6 +38,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   http: ^1.2.2
+  googleapis: ^13.2.0
+  googleapis_auth: ^1.0.0
+  socket_io_client: ^2.0.0
+  web_socket_channel: ^3.0.1
 
 
 dev_dependencies:
@@ -67,6 +71,13 @@ flutter:
     - assets/images/WEarly_logo.png
     - assets/images/yellow_closet.png
     - assets/images/closet.png
+    - assets/images/minimal.png
+    - assets/images/street.png
+    - assets/images/casual.png
+    - assets/images/modern.png
+    - assets/images/lovely.png
+    - assets/images/vintage.png
+
 
   #   - images/a_dot_ham.jpeg
 

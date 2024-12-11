@@ -16,7 +16,6 @@ class FirstScreen extends StatelessWidget {
               height: 250,
             ),
             const SizedBox(height: 50),
-            // 로그인/회원가입 버튼
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/login');

@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
 
 void main() {
   runApp(const SmartClosetApp());
@@ -27,7 +30,7 @@ class _SmartClosetUIState extends State<SmartClosetUI>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
-  bool isClosetOpen = false; // 옷장 상태
+  bool isClosetOpen = false;
 
   @override
   void initState() {
@@ -88,14 +91,14 @@ class _SmartClosetUIState extends State<SmartClosetUI>
       backgroundColor: Colors.grey[200],
       body: Center(
         child: GestureDetector(
-          onTap: toggleCloset, // 클릭 시 열리고 닫힘 전환
+          onTap: toggleCloset,
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: Image.asset(
               'assets/images/closet.png',
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              fit: BoxFit.contain, // 화면 맞춤
+              fit: BoxFit.contain,
             ),
           ),
         ),
@@ -104,10 +107,44 @@ class _SmartClosetUIState extends State<SmartClosetUI>
   }
 }
 
-class ClosetContentScreen extends StatelessWidget {
+class ClosetContentScreen extends StatefulWidget {
   final VoidCallback onBack;
 
   const ClosetContentScreen({super.key, required this.onBack});
+
+  @override
+  State<ClosetContentScreen> createState() => _ClosetContentScreenState();
+}
+
+class _ClosetContentScreenState extends State<ClosetContentScreen> {
+  final WebSocketChannel _channel =
+      WebSocketChannel.connect(Uri.parse('ws://172.20.40.222/ws')); //서버 연결
+  final List<Map<String, dynamic>> _clothingItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _listenForUpdates();
+  }
+
+  @override
+  void dispose() {
+    _channel.sink.close(status.normalClosure);
+    super.dispose();
+  }
+
+  void _listenForUpdates() {
+    _channel.stream.listen((message) {
+      final data = jsonDecode(message);
+      setState(() {
+        _clothingItems.add(data);
+      });
+    }, onError: (error) {
+      print("WebSocket 에러: $error");
+    }, onDone: () {
+      print("WebSocket 연결 종료됨");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,15 +154,33 @@ class ClosetContentScreen extends StatelessWidget {
         backgroundColor: Colors.blueGrey,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: onBack,
+          onPressed: widget.onBack,
         ),
       ),
-      body: const Center(
-        child: Text(
-          "옷 리스트 화면",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-      ),
+      body: _clothingItems.isEmpty
+          ? const Center(
+              child: Text(
+                "옷 리스트가 없습니다.",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+              ),
+            )
+          : ListView.builder(
+              itemCount: _clothingItems.length,
+              itemBuilder: (context, index) {
+                final item = _clothingItems[index];
+                return ListTile(
+                  leading: Image.network(
+                    item['imageUrl'],
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+                  title: Text(item['visionData']['label'] ?? "Unknown"),
+                  subtitle:
+                      Text("색상: ${item['visionData']['color'] ?? "Unknown"}"),
+                );
+              },
+            ),
     );
   }
 }

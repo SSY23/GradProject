@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:wearly/remove_back.dart';
+import 'package:wearly/selected_style.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,8 +16,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0; // Default: 옷장
-  final List<dynamic> _uploadedImages = []; // File 또는 URL 저장 가능
+  int _currentIndex = 0; // 기본 화면: 옷장
+  final List<dynamic> _uploadedImages = [];
   final ImagePicker _picker = ImagePicker();
   final RemoveBgService _removeBgService = RemoveBgService();
 
@@ -24,11 +29,19 @@ class _HomeScreenState extends State<HomeScreen> {
         _uploadedImages.add(imageFile);
       });
 
-      // 배경 제거 API 호출 (서버와 연결)
       String? resultUrl = await _removeBgService.removeBackground(imageFile);
       if (resultUrl != null) {
         setState(() {
-          _uploadedImages[_uploadedImages.length - 1] = resultUrl; // URL로 업데이트
+          _uploadedImages[_uploadedImages.length - 1] = resultUrl;
+        });
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StyleSelectorScreen(imageUrl: resultUrl),
+          ),
+        ).then((_) {
+          setState(() {});
         });
       }
     }
@@ -82,56 +95,40 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _currentIndex == 0
               ? GridView.builder(
-            padding: const EdgeInsets.all(10),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: _uploadedImages.length,
-            itemBuilder: (context, index) {
-              var image = _uploadedImages[index];
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  image is String
-                      ? Image.network(
-                    image,
-                    fit: BoxFit.cover,
-                  )
-                      : Image.file(
-                    image,
-                    fit: BoxFit.cover,
+                  padding: const EdgeInsets.all(10),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
                   ),
-                  Positioned(
-                    top: 5,
-                    right: 5,
-                    child: GestureDetector(
-                      onTap: () => _removeImage(index),
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: const BoxDecoration(
-                          color: Colors.black12,
-                          shape: BoxShape.circle,
+                  itemCount: _uploadedImages.length,
+                  itemBuilder: (context, index) {
+                    var image = _uploadedImages[index];
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        image is String
+                            ? Image.network(image, fit: BoxFit.cover)
+                            : Image.file(image, fit: BoxFit.cover),
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: GestureDetector(
+                            onTap: () => _removeImage(index),
+                            child: const Icon(Icons.remove_circle,
+                                color: Colors.red),
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.remove,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          )
+                      ],
+                    );
+                  },
+                )
               : Center(
-            child: Text(
-              _currentIndex == 1 ? '추천 기록 페이지' : '마이 페이지',
-              style: const TextStyle(fontSize: 20),
-            ),
-          ),
+                  child: Text(
+                    _currentIndex == 1 ? '추천 기록 페이지' : '마이 페이지',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ),
           if (_currentIndex == 0)
             Positioned(
               bottom: 70,
@@ -152,18 +149,9 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.photo_library),
-            label: '옷장',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: '추천 기록',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '마이 페이지',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.photo_library), label: '옷장'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: '추천 기록'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이 페이지'),
         ],
       ),
     );

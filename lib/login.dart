@@ -43,7 +43,7 @@ class _LoginViewState extends State<LoginView> {
     });
 
     final url =
-    Uri.parse('http://172.20.4.99:3000/auth/login'); // 서버의 URL을 입력하세요
+    Uri.parse('http://172.20.40.222:3000/auth/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

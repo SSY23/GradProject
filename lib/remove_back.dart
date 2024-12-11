@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 
 class RemoveBgService {
-  final String serverUrl = 'http://172.20.4.99:3000/closet/test';
+  final String serverUrl = 'http://172.20.40.222:3000/closet/bgremoved';
 
   Future<String?> removeBackground(File imageFile) async {
     try {
@@ -18,7 +18,7 @@ class RemoveBgService {
       var multipartFile = await http.MultipartFile.fromPath('image', imageFile.path);
       request.files.add(multipartFile);
 
-      var response = await request.send().timeout(Duration(seconds: 30)); // 30초 타임아웃
+      var response = await request.send().timeout(Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final responseData = await response.stream.bytesToString();
@@ -32,7 +32,6 @@ class RemoveBgService {
         }
       } else {
         print('배경 제거 실패: ${response.statusCode} - ${response.reasonPhrase}');
-        // 응답 데이터 로깅
         final responseData = await response.stream.bytesToString();
         print('응답 데이터: $responseData');
         return null;
