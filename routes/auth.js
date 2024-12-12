@@ -65,7 +65,10 @@ router.post('/login', async (req, res) => {
             expiresIn: '1h', // 토큰 만료 시간 (1시간)
         });
 
-        res.json({ message: '로그인 성공', token });
+        res.json({ message: '로그인 성공', token,
+            user_id : user.email,
+         });
+         
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: '서버 오류' });
