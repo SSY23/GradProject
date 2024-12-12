@@ -4,8 +4,13 @@ import 'dart:convert';
 
 class StyleSelectorScreen extends StatefulWidget {
   final String imageUrl;
+  final String userId;
 
-  const StyleSelectorScreen({super.key, required this.imageUrl});
+  const StyleSelectorScreen({
+    super.key,
+    required this.imageUrl,
+    required this.userId,
+  });
 
   @override
   StyleSelectorScreenState createState() => StyleSelectorScreenState();
@@ -34,20 +39,25 @@ class StyleSelectorScreenState extends State<StyleSelectorScreen> {
     });
   }
 
-  Future<void> sendSelectedStylesToServer(List<String> styles) async {
-    const String apiUrl = "http://172.20.40.222:3000/closet/styles";
+  Future<void> sendSelectedStylesToServer(
+      String userId, List<String> styles) async {
+    const String apiUrl = "http://172.20.40.21:3000/closet/styles";
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"imageUrl": widget.imageUrl, "styles": styles}),
+        body: jsonEncode({
+          "userId": userId,
+          "imageUrl": widget.imageUrl,
+          "styles": styles,
+        }),
       );
 
-      if (response.statusCode == 200) {
-        print("스타일 데이터 전송 성공: \${response.body}");
+      if (response.statusCode == 201) {
+        print("스타일 데이터 전송 성공: ${response.body}");
       } else {
-        print("스타일 데이터 전송 실패: \${response.statusCode}");
+        print("스타일 데이터 전송 실패: ${response.statusCode}");
       }
     } catch (e) {
       print("서버 요청 중 오류 발생: $e");
@@ -65,6 +75,17 @@ class StyleSelectorScreenState extends State<StyleSelectorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Padding(
+              padding: EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                "업로드한 옷의 스타일을 선택해주세요!",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -121,7 +142,11 @@ class StyleSelectorScreenState extends State<StyleSelectorScreen> {
 
                 print('선택된 스타일: $selectedStyles');
 
-                await sendSelectedStylesToServer(selectedStyles);
+                Navigator.pop(context);
+
+                await sendSelectedStylesToServer(widget.userId, selectedStyles);
+
+
               },
               child: const Text('선택 완료'),
             ),

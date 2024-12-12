@@ -4,6 +4,7 @@ import 'package:wearly/homescreen.dart';
 import 'package:wearly/signup.dart';
 import 'package:wearly/login.dart';
 import 'package:wearly/selected_style.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -18,13 +19,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
-      home: const StyleSelectorScreen(
-        imageUrl: 'http://example.com/sample-image.jpg',
-      ),
+      initialRoute: '/',
       routes: {
+        '/': (context) => const FirstScreen(),
         '/signup': (context) => const AuthView(),
         '/login': (context) => const LoginView(),
-        '/home': (context) => const HomeScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/home') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          if (args != null && args.containsKey('userId')) {
+            return MaterialPageRoute(
+              builder: (context) => HomeScreen(userId: args['userId']),
+            );
+          }
+        }
+        return null;
       },
     );
   }

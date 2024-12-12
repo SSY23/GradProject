@@ -37,13 +37,13 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+
   Future<void> _loginUser() async {
     setState(() {
       isLoading = true;
     });
 
-    final url =
-    Uri.parse('http://172.20.40.222:3000/auth/login');
+    final url = Uri.parse('http://172.20.40.21:3000/auth/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -55,9 +55,19 @@ class _LoginViewState extends State<LoginView> {
 
     if (response.statusCode == 200) {
       print('로그인 성공');
+
+      // 응답 데이터에서 사용자 ID 추출
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      final String userId = responseData['user_id'];
+
+
+      // 홈 화면으로 이동하면서 사용자 ID와 이미지를 전달
       Navigator.pushReplacementNamed(
         context,
         '/home',
+        arguments: {
+          'userId': userId,
+        },
       );
     } else {
       _showErrorDialog('로그인 실패: 이메일이나 비밀번호를 확인하세요.');

@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 
 class RemoveBgService {
-  final String serverUrl = 'http://172.20.40.222:3000/closet/bgremoved';
+  final String serverUrl = 'http://172.20.40.21:3000/closet/bgremoved';
 
   Future<String?> removeBackground(File imageFile) async {
     try {

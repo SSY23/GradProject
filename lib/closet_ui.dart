@@ -56,13 +56,11 @@ class _SmartClosetUIState extends State<SmartClosetUI>
 
   void toggleCloset() {
     if (isClosetOpen) {
-      // 옷장 닫기
       Navigator.pop(context);
       setState(() {
         isClosetOpen = false;
       });
     } else {
-      // 옷장 열기
       _controller.forward().then((_) {
         Navigator.push(
           context,
@@ -118,8 +116,8 @@ class ClosetContentScreen extends StatefulWidget {
 
 class _ClosetContentScreenState extends State<ClosetContentScreen> {
   final WebSocketChannel _channel =
-      WebSocketChannel.connect(Uri.parse('ws://172.20.40.222/ws')); //서버 연결
-  final List<Map<String, dynamic>> _clothingItems = [];
+  WebSocketChannel.connect(Uri.parse('ws://172.20.40.21:3001')); // 서버 연결
+  final List<String> _clothingImages = [];
 
   @override
   void initState() {
@@ -135,10 +133,21 @@ class _ClosetContentScreenState extends State<ClosetContentScreen> {
 
   void _listenForUpdates() {
     _channel.stream.listen((message) {
-      final data = jsonDecode(message);
-      setState(() {
-        _clothingItems.add(data);
-      });
+      try {
+        final data = jsonDecode(message);
+
+        // 이미지를 포함한 메시지 필터링
+        if (data.containsKey('imageUrl')) {
+          setState(() {
+            _clothingImages.add(data['imageUrl']);
+          });
+        } else {
+          print("알 수 없는 데이터 형식: $data");
+        }
+
+      } catch (e) {
+        print("WebSocket 데이터 처리 오류: $e");
+      }
     }, onError: (error) {
       print("WebSocket 에러: $error");
     }, onDone: () {
@@ -157,30 +166,28 @@ class _ClosetContentScreenState extends State<ClosetContentScreen> {
           onPressed: widget.onBack,
         ),
       ),
-      body: _clothingItems.isEmpty
+      body: _clothingImages.isEmpty
           ? const Center(
-              child: Text(
-                "옷 리스트가 없습니다.",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-              ),
-            )
+        child: Text(
+          "옷 리스트가 없습니다.",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+        ),
+      )
           : ListView.builder(
-              itemCount: _clothingItems.length,
-              itemBuilder: (context, index) {
-                final item = _clothingItems[index];
-                return ListTile(
-                  leading: Image.network(
-                    item['imageUrl'],
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
-                  title: Text(item['visionData']['label'] ?? "Unknown"),
-                  subtitle:
-                      Text("색상: ${item['visionData']['color'] ?? "Unknown"}"),
-                );
-              },
+        itemCount: _clothingImages.length,
+        itemBuilder: (context, index) {
+          final imageUrl = _clothingImages[index];
+          return ListTile(
+            leading: Image.network(
+              imageUrl,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
             ),
+            title: const Text("새로운 옷"),
+          );
+        },
+      ),
     );
   }
 }
