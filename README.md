@@ -7,7 +7,6 @@
 ## 프로젝트 디렉토리 구조
 
 
-
 ** 프로젝트 디렉토리 구조 **
 ```
 GradProject/
@@ -24,10 +23,12 @@ GradProject/
 │   ├── closet/                # 옷장 관련 라우트
 │   ├── outfit/                # 옷차림 관련 라우트
 │   ├── weather/               # 날씨 관련 라우트
+│   ├── tablet/                # 태블릿 관련 라우트 (스마트 옷장 대체)
 │   ├── auth.js                # 인증 라우트
 │   ├── closet.js              # 옷장 라우트
 │   ├── outfit.js              # 옷차림 라우트
-│   └── weather.js             # 날씨 라우트
+│   ├── weather.js             # 날씨 라우트
+│   └── tablet.js              # 태블릿 라우트
 │
 ├── uploads/                   # 업로드된 파일들
 │
