@@ -30,6 +30,9 @@ const analyzeImage = async (imageUrl) => {
             "type": "OBJECT_LOCALIZATION",
             "maxResults": 2
           },
+          {
+            "type": "IMAGE_PROPERTIES" // 색상 정보를 포함
+          }
         ]
       }
     ]
@@ -40,13 +43,41 @@ const analyzeImage = async (imageUrl) => {
       headers: { "Content-Type": "application/json" }
     });
 
-    return response; // 응답 전체 반환
+    // 반환 데이터 디버깅
+    console.log('Google Vision API 응답:', response.data);
 
+    return response.data.responses[0]; // 첫 번째 요청의 응답만 반환
   } catch (error) {
     console.error('Google Vision API 호출 실패:', error);
     throw new Error('Google Vision API 호출 실패');
   }
 };
+
+
+router.get('/images', (req, res) => {
+  const userId = req.query.userId;
+
+  // Query to fetch image URLs based on userId
+  const query = 'SELECT image_url FROM vision_data WHERE user_id = ?';
+
+  db.query(query, [userId], (err, result) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'Database query error',
+        error: err.message // Return detailed error message
+      });
+    }
+
+    // If no images are found, send an empty array, not an error
+    res.status(200).json({
+      success: true,
+      message: result.length > 0 ? 'Images retrieved successfully' : 'No images found for the given userId',
+      data: result // This will be an empty array if no images are found
+    });
+  });
+});
 
 router.post('/bgremoved', testUpload.single('image'), async (req, res) => {
   const imageFile = req.file;
@@ -92,25 +123,34 @@ router.post('/bgremoved', testUpload.single('image'), async (req, res) => {
 
     // 배경이 제거된 이미지 URL 생성
     const bgRemovedImageUrl = `${serverUrl}/uploads/test/bg-removed-${imageFile.filename}.jpg`;
+    
+    const bgRemovedImageUrl2 = `https://localhost:3000/uploads/test/bg-removed-${imageFile.filename}.jpg`;
 
-    // 응답
+    // Google Vision API 호출
+    const visionData = await analyzeImage(bgRemovedImageUrl2);
+
+    // labels와 objects 데이터 추출
+    const labels = visionData.labelAnnotations?.map((label) => label.description) || [];
+    const objects = visionData.localizedObjectAnnotations?.map((obj) => obj.name) || [];
+    const colors = visionData.imagePropertiesAnnotation?.dominantColors.colors.map((color) => ({
+      red: color.color.red,
+      green: color.color.green,
+      blue: color.color.blue,
+      score: color.score, // 색상의 비율
+    })) || [];
+    console.log('Labels:', labels); // 라벨 정보
+    console.log('Objects:', objects); // 객체 정보
+    console.log('Colors:', colors); // 색상 정보
+
+    // 프론트엔드로 반환
     res.status(200).json({
-      message: '배경이 제거된 이미지가 성공적으로 처리되었습니다!',
-      bg_removed_image_url: bgRemovedImageUrl,  // 서버 URL로 반환
+      message: '이미지 처리 및 분석 완료',
+      bg_removed_image_url: bgRemovedImageUrl,
     });
   } catch (error) {
-    console.error('remove.bg API error:', error);  // 디버깅용 메시지
-    res.status(500).json({ error: '배경 제거에 실패했습니다.' });
+    console.error('이미지 분석 실패:', error);
+    res.status(500).json({ error: '이미지 분석에 실패했습니다.' });
   }
-  const bgRemovedImageUrl2 = 'https://localhost:3000/uploads/test/bg-removed-${imageFile.filename}.jpg' ;
-  
-  try {
-    const visionData = await analyzeImage(bgRemovedImageUrl2);
-    console.log('Image analysis result:', visionData);
-  } catch (visionError) {
-    console.error('이미지 분석에 실패했습니다:', visionError);
-  }
-
 });
 
 router.post('/styles', async (req, res) => {
