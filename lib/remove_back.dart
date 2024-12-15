@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'config.dart';
 
 class RemoveBgService {
-  final String serverUrl = 'http://172.20.40.21:3000/closet/bgremoved';
+  final String serverurl = '$serverUrl/closet/bgremoved';
 
   Future<String?> removeBackground(File imageFile) async {
     try {
@@ -13,12 +14,13 @@ class RemoveBgService {
         return null;
       }
 
-      var request = http.MultipartRequest('POST', Uri.parse(serverUrl));
+      var request = http.MultipartRequest('POST', Uri.parse(serverurl));
 
-      var multipartFile = await http.MultipartFile.fromPath('image', imageFile.path);
+      var multipartFile =
+          await http.MultipartFile.fromPath('image', imageFile.path);
       request.files.add(multipartFile);
 
-      var response = await request.send().timeout(Duration(seconds: 30));
+      var response = await request.send().timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final responseData = await response.stream.bytesToString();

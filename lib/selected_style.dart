@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'config.dart';
 
 class StyleSelectorScreen extends StatefulWidget {
   final String imageUrl;
@@ -41,7 +42,7 @@ class StyleSelectorScreenState extends State<StyleSelectorScreen> {
 
   Future<void> sendSelectedStylesToServer(
       String userId, List<String> styles) async {
-    const String apiUrl = "http://172.20.40.21:3000/closet/styles";
+    const String apiUrl = "$serverUrl/closet/styles";
 
     try {
       final response = await http.post(
@@ -145,8 +146,6 @@ class StyleSelectorScreenState extends State<StyleSelectorScreen> {
                 Navigator.pop(context);
 
                 await sendSelectedStylesToServer(widget.userId, selectedStyles);
-
-
               },
               child: const Text('선택 완료'),
             ),

@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
-      initialRoute: '/',
+      initialRoute: '/',  //초기화면
       routes: {
         '/': (context) => const FirstScreen(),
         '/signup': (context) => const AuthView(),

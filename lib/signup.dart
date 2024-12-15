@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'config.dart';
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});
@@ -99,7 +100,7 @@ class _AuthViewState extends State<AuthView> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://172.20.40.40:3000/auth/signup');
+    final url = Uri.parse('$serverUrl/auth/signup');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

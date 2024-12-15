@@ -20,7 +20,7 @@ class SmartClosetApp extends StatelessWidget {
 }
 
 class SmartClosetUI extends StatefulWidget {
-  const SmartClosetUI({super.key});
+  const SmartClosetUI({super.key, required String userId});
 
   @override
   _SmartClosetUIState createState() => _SmartClosetUIState();
@@ -108,7 +108,8 @@ class _SmartClosetUIState extends State<SmartClosetUI>
 class ClosetContentScreen extends StatefulWidget {
   final VoidCallback onBack;
 
-  const ClosetContentScreen({super.key, required this.onBack});
+  const ClosetContentScreen(
+      {super.key, required this.onBack, required String userId});
 
   @override
   State<ClosetContentScreen> createState() => _ClosetContentScreenState();
@@ -116,7 +117,7 @@ class ClosetContentScreen extends StatefulWidget {
 
 class _ClosetContentScreenState extends State<ClosetContentScreen> {
   final WebSocketChannel _channel =
-  WebSocketChannel.connect(Uri.parse('ws://172.20.40.21:3001')); // 서버 연결
+      WebSocketChannel.connect(Uri.parse('ws://172.20.40.21:3001')); // 서버 연결
   final List<String> _clothingImages = [];
 
   @override
@@ -144,7 +145,6 @@ class _ClosetContentScreenState extends State<ClosetContentScreen> {
         } else {
           print("알 수 없는 데이터 형식: $data");
         }
-
       } catch (e) {
         print("WebSocket 데이터 처리 오류: $e");
       }
@@ -168,26 +168,26 @@ class _ClosetContentScreenState extends State<ClosetContentScreen> {
       ),
       body: _clothingImages.isEmpty
           ? const Center(
-        child: Text(
-          "옷 리스트가 없습니다.",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-        ),
-      )
+              child: Text(
+                "옷 리스트가 없습니다.",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+              ),
+            )
           : ListView.builder(
-        itemCount: _clothingImages.length,
-        itemBuilder: (context, index) {
-          final imageUrl = _clothingImages[index];
-          return ListTile(
-            leading: Image.network(
-              imageUrl,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
+              itemCount: _clothingImages.length,
+              itemBuilder: (context, index) {
+                final imageUrl = _clothingImages[index];
+                return ListTile(
+                  leading: Image.network(
+                    imageUrl,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+                  title: const Text("새로운 옷"),
+                );
+              },
             ),
-            title: const Text("새로운 옷"),
-          );
-        },
-      ),
     );
   }
 }

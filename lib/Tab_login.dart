@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:wearly/tablet_main.dart';
+import 'package:wearly/weather.dart';
 import 'dart:convert';
 import 'config.dart';
 
@@ -54,19 +56,18 @@ class _LoginViewState extends State<LoginView> {
     );
 
     if (response.statusCode == 200) {
-      print('로그인 성공');
-
-      // 응답 데이터에서 사용자 ID 추출
       final Map<String, dynamic> responseData = json.decode(response.body);
       final String userId = responseData['user_id'];
 
-      // 홈 화면으로 이동하면서 사용자 ID와 이미지를 전달
-      Navigator.pushReplacementNamed(
+      print('유저 아이디: $userId');
+
+      // 로그인 성공 시 SmartClosetUI로 이동
+      Navigator.pushReplacement(
         context,
-        '/home',
-        arguments: {
-          'userId': userId,
-        },
+        MaterialPageRoute(
+            builder: (context) => SmartClosetUI(
+                  userId: userId,
+                )),
       );
     } else {
       _showErrorDialog('로그인 실패: 이메일이나 비밀번호를 확인하세요.');
@@ -81,12 +82,6 @@ class _LoginViewState extends State<LoginView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('로그인'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -118,8 +113,10 @@ class _LoginViewState extends State<LoginView> {
                       ? const CircularProgressIndicator(
                           color: Colors.white,
                         )
-                      : const Text('로그인하기',
-                          style: TextStyle(color: Colors.white)),
+                      : const Text(
+                          '로그인하기',
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
               ),
             ),
