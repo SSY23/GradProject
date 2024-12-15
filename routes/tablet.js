@@ -11,9 +11,9 @@ router.get('/images', async (req, res) => {
   }
 
   try {
-    // 데이터베이스에서 userId에 해당하는 이미지 URL과 카테고리 가져오기
+    // 데이터베이스에서 userId에 해당하는 이미지 URL 가져오기
     const [rows] = await db.execute(
-      'SELECT image_url, category FROM vision_data WHERE user_id = ?',
+      'SELECT image_url FROM vision_data WHERE user_id = ?',
       [userId]
     );
 

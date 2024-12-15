@@ -42,15 +42,19 @@ const analyzeImage = async (imageUrl) => {
     const response = await axios.post(endpoint, requestBody, {
       headers: { "Content-Type": "application/json" }
     });
-
-    // 반환 데이터 디버깅
+  
     console.log('Google Vision API 응답:', response.data);
-
+    
+    if (response.data.error) {
+      console.error('API 에러:', response.data.error);
+    }
+  
     return response.data.responses[0]; // 첫 번째 요청의 응답만 반환
   } catch (error) {
     console.error('Google Vision API 호출 실패:', error);
     throw new Error('Google Vision API 호출 실패');
   }
+  
 };
 
 
@@ -197,7 +201,7 @@ router.post('/styles', async (req, res) => {
 
     // 응답
     res.status(201).json({
-      message: 'Vision data and styles successfully saved!',
+      message: 'Vision data and styles successfully saved and tablet notified!',
       vision_data: {
         id: visionId,
         user_id: userId,
